@@ -45,7 +45,7 @@
         '<div class="ngn" data-ng-class="ngNotify.notifyClass" data-ng-style="ngNotify.notifyStyle" data-ng-swipe-right="ngNotify.dismissSwipe(\'left\')" data-ng-swipe-left="ngNotify.dismissSwipe(\'right\')">' +
             '<span data-ng-show="ngNotify.notifyButton" class="ngn-dismiss" data-ng-click="dismiss()">&times;</span>' +
             '<span data-ng-if="ngNotify.notifyHtml && !ngNotify.useScope" data-ng-bind-html="ngNotify.notifyMessage"></span>' + // Display HTML notifications.
-            '<span data-ng-if="ngNotify.notifyHtml && ngNotify.useScope" class="data-ng-notify-injection-element"></span>' + // Display HTML and scope notifications.
+            '<span data-ng-if="ngNotify.notifyHtml && ngNotify.useScope" class="ng-notify-injection-element"></span>' + // Display HTML and scope notifications.
             '<span data-ng-if="!ngNotify.notifyHtml" data-ng-bind="ngNotify.notifyMessage"></span>' + // Display escaped notifications.
         '</div>';
 
@@ -323,8 +323,6 @@
                       };
                     }
 
-                    notifyScope.ngNotify.injectCompiledScope();
-
                     var func = function() {
 
                         opacity += mode * gap;
@@ -437,7 +435,6 @@
                             notifyButton: showButton(userOpts, isSticky),
                             useScope: getScope(userOpts),
                             dismissOnSwipe: getDismissOnSwipe(userOpts),
-                            injectCompiledScope: function () {},
                             dismissSwipe: function (direction) {
                               notifyScope.ngNotify.direction = direction;
                               notifyScope.dismiss();
@@ -445,9 +442,9 @@
                         });
 
                         if (userOpts.scope && getHtml(userOpts)) {
-                            notifyScope.ngNotify.injectCompiledScope = function () {
+                            $timeout(function () {
                                 $document.find("span.ng-notify-injection-element").append($compile(message)(userOpts.scope));
-                            };
+                            });
                         } else {
                             angular.extend(notifyScope.ngNotify, {
                                 notifyMessage:  message
