@@ -304,7 +304,7 @@
                 var doFade = function(mode, opacity, duration, callback) {
 
                     var gap = FADE_INTERVAL / duration;
-                    var slide_gap = 1000 / duration;
+                    var slide_gap = 5000 / duration;
 
                     notifyScope.ngNotify.notifyStyle = {
                         display: 'block',
@@ -322,6 +322,8 @@
                         notifyScope.ngNotify.notifyStyle[('margin-' + notifyScope.ngNotify.direction)] = margin + "%";
                       };
                     }
+
+                    notifyScope.ngNotify.injectCompiledScope();
 
                     var func = function() {
 
@@ -435,6 +437,7 @@
                             notifyButton: showButton(userOpts, isSticky),
                             useScope: getScope(userOpts),
                             dismissOnSwipe: getDismissOnSwipe(userOpts),
+                            injectCompiledScope: function () {},
                             dismissSwipe: function (direction) {
                               notifyScope.ngNotify.direction = direction;
                               notifyScope.dismiss();
@@ -442,9 +445,9 @@
                         });
 
                         if (userOpts.scope && getHtml(userOpts)) {
-                            $timeout(function () {
+                            notifyScope.ngNotify.injectCompiledScope = function () {
                                 $document.find("span.ng-notify-injection-element").append($compile(message)(userOpts.scope));
-                            });
+                            };
                         } else {
                             angular.extend(notifyScope.ngNotify, {
                                 notifyMessage:  message
