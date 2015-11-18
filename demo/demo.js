@@ -75,6 +75,8 @@ app.controller('MainCtrl', ['$scope', 'ngNotify',
         $scope.theme = 'pure';
         $scope.themeOptions = ['pure', 'pastel', 'prime', 'pitchy'];
 
+        $scope.dismissOnSwipe = true;
+
         $scope.duration = 4000;
         $scope.durationOptions = [
             { id: 500, value: '500 ms' },

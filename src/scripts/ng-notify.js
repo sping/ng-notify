@@ -13,7 +13,7 @@
      * system for displaying notifications of varying degree to it's users.
      *
      */
-    var module = angular.module('ngNotify', []);
+    var module = angular.module('ngNotify', ['ngTouch']);
 
     /**
      * Check to see if the ngSanitize script has been included by the user.
@@ -42,11 +42,11 @@
     // Generate ngNotify template and add it to cache...
 
     var html =
-        '<div class="ngn" ng-class="ngNotify.notifyClass" ng-style="ngNotify.notifyStyle">' +
-            '<span ng-show="ngNotify.notifyButton" class="ngn-dismiss" ng-click="dismiss()">&times;</span>' +
-            '<span ng-if="ngNotify.notifyHtml && !ngNotify.useScope" ng-bind-html="ngNotify.notifyMessage"></span>' + // Display HTML notifications.
-            '<span ng-if="ngNotify.notifyHtml && ngNotify.useScope" class="ng-notify-injection-element"></span>' + // Display HTML and scope notifications.
-            '<span ng-if="!ngNotify.notifyHtml" ng-bind="ngNotify.notifyMessage"></span>' + // Display escaped notifications.
+        '<div class="ngn" data-ng-class="ngNotify.notifyClass" data-ng-style="ngNotify.notifyStyle" data-ng-swipe-right="ngNotify.dismissSwipe(\'left\')" data-ng-swipe-left="ngNotify.dismissSwipe(\'right\')">' +
+            '<span data-ng-show="ngNotify.notifyButton" class="ngn-dismiss" data-ng-click="dismiss()">&times;</span>' +
+            '<span data-ng-if="ngNotify.notifyHtml && !ngNotify.useScope" data-ng-bind-html="ngNotify.notifyMessage"></span>' + // Display HTML notifications.
+            '<span data-ng-if="ngNotify.notifyHtml && ngNotify.useScope" class="data-ng-notify-injection-element"></span>' + // Display HTML and scope notifications.
+            '<span data-ng-if="!ngNotify.notifyHtml" data-ng-bind="ngNotify.notifyMessage"></span>' + // Display escaped notifications.
         '</div>';
 
     module.run(['$templateCache',
@@ -88,7 +88,9 @@
                     type: 'info',
                     sticky: false,
                     button: true,
-                    html: false
+                    html: false,
+                    scope: {},
+                    dismissOnSwipe: false
                 };
 
                 var defaultScope = {
@@ -244,6 +246,28 @@
                 };
 
                 /**
+                 * Returns whether a scope is provided.
+                 *
+                 * @param {Object}  userOpts - object containing user defined options.
+                 *
+                 * @returns {boolean}
+                 */
+                var getScope = function(userOpts) {
+                    return userOpts.scope ? true : false;
+                };
+
+                /**
+                 * Empty function is nothing has to happen or swipe out of screen on dismissal, depending on the option dismissOnSwipe.
+                 *
+                 * @param {Object}  userOpts - object containing user defined options.
+                 *
+                 * @returns {boolean}
+                 */
+                var getDismissOnSwipe = function(userOpts) {
+                    return  userOpts.dismissOnSwipe || defaultOptions.dismissOnSwipe;
+                };
+
+                /**
                  * Grabs all of the classes that our notification will need in order to display properly.
                  *
                  * @param {Object}  userOpts - object containing user defined options.
@@ -280,17 +304,31 @@
                 var doFade = function(mode, opacity, duration, callback) {
 
                     var gap = FADE_INTERVAL / duration;
+                    var slide_gap = 1000 / duration;
 
                     notifyScope.ngNotify.notifyStyle = {
                         display: 'block',
                         opacity: opacity
                     };
 
+                    var slide = function () {};
+                    var margin = 0;
+
+                    if (mode === FADE_OUT_MODE && notifyScope.ngNotify.dismissSwipe) {
+                      notifyScope.ngNotify.notifyStyle['overflow-x'] = "hidden";
+                      notifyScope.ngNotify.notifyStyle[('margin-' + notifyScope.ngNotify.direction)] = margin + "%";
+                      slide = function () {
+                        margin += slide_gap;
+                        notifyScope.ngNotify.notifyStyle[('margin-' + notifyScope.ngNotify.direction)] = margin + "%";
+                      };
+                    }
+
                     var func = function() {
 
                         opacity += mode * gap;
 
                         notifyScope.ngNotify.notifyStyle.opacity = opacity;
+                        slide();
 
                         if (opacity <= OPACITY_MIN || OPACITY_MAX <= opacity) {
 
@@ -365,8 +403,7 @@
                      * @param {Boolean|undefined}        userOpt.button
                      * @param {Boolean|undefined}        userOpt.html
                      * @param {Object|undefined}         userOpt.scope
-                     * @param {Function|undefined}       userOpt.swipeLeft
-                     * @param {Function|undefined}       userOpt.swipeRight
+                     * @param {Boolean|undefined}        userOpt.dismissOnSwipe
                      */
                     set: function(message, userOpt) {
 
@@ -396,7 +433,12 @@
                             notifyHtml: getHtml(userOpts),
                             notifyClass: getClasses(userOpts, isSticky),
                             notifyButton: showButton(userOpts, isSticky),
-                            useScope: userOpts.scope ? true : false
+                            useScope: getScope(userOpts),
+                            dismissOnSwipe: getDismissOnSwipe(userOpts),
+                            dismissSwipe: function (direction) {
+                              notifyScope.ngNotify.direction = direction;
+                              notifyScope.dismiss();
+                            }
                         });
 
                         if (userOpts.scope && getHtml(userOpts)) {

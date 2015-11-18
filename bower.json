@@ -30,7 +30,8 @@
     "package.json"
   ],
   "dependencies": {
-    "angular": "~1.4.0"
+    "angular": "~1.4.0",
+    "angular-touch": "~1.4.7"
   },
   "devDependencies": {
     "angular-sanitize": "~1.4.0",
