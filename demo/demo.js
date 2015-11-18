@@ -64,8 +64,14 @@ app.controller('MainCtrl', ['$scope', 'ngNotify',
                 case 'scope':
                     ngNotify.set('<span>{{text}}</span>', { scope: $scope });
                     break;
+                case 'onClose':
+                    ngNotify.set('An alert will open on close!', {
+                        onClose: function () {
+                            alert("closed!");
+                        }});
+                    break;
                 default:
-                    ngNotify.set('This is the current default message type.');
+                    ngNotify.set('This is the current default message type.');    
                     break;
             }
         };

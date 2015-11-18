@@ -90,7 +90,8 @@
                     button: true,
                     html: false,
                     scope: {},
-                    dismissOnSwipe: false
+                    dismissOnSwipe: false,
+                    onClose: function () {}
                 };
 
                 var defaultScope = {
@@ -267,6 +268,10 @@
                     return  userOpts.dismissOnSwipe || defaultOptions.dismissOnSwipe;
                 };
 
+                var getOnClose = function(userOpts) {
+                    return userOpts.onClose || defaultOptions.onClose;
+                };
+
                 /**
                  * Grabs all of the classes that our notification will need in order to display properly.
                  *
@@ -323,6 +328,8 @@
                       };
                     }
 
+                    var onCloseFunc;
+
                     var func = function() {
 
                         opacity += mode * gap;
@@ -351,7 +358,10 @@
                  * @param {Function} callback - function to invoke once fade has completed.
                  */
                 var fadeOut = function(duration, callback) {
-                    doFade(FADE_OUT_MODE, OPACITY_MAX, duration, callback);
+                    doFade(FADE_OUT_MODE, OPACITY_MAX, duration, function () {
+                        notifyScope.ngNotify.onClose();
+                        callback();
+                    });
                 };
 
                 /**
@@ -438,7 +448,8 @@
                             dismissSwipe: function (direction) {
                               notifyScope.ngNotify.direction = direction;
                               notifyScope.dismiss();
-                            }
+                            },
+                            onClose: getOnClose(userOpts)
                         });
 
                         if (userOpts.scope && getHtml(userOpts)) {
