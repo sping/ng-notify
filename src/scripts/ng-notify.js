@@ -74,7 +74,7 @@
                 var FADE_OUT_MODE = -1;
                 var FADE_IN_DURATION = 200;
                 var FADE_OUT_DURATION = 500;
-                var FADE_INTERVAL = 25;
+                var FADE_INTERVAL = 750;
 
                 var OPACITY_MIN = 0;
                 var OPACITY_MAX = 1;
@@ -83,7 +83,7 @@
 
                 var defaultOptions = {
                     theme: 'pure',
-                    position: 'bottom',
+                    position: 'top',
                     duration: DEFAULT_DURATION,
                     type: 'info',
                     sticky: false,
@@ -308,47 +308,25 @@
                  */
                 var doFade = function(mode, opacity, duration, callback) {
 
-                    var gap = FADE_INTERVAL / duration;
-                    var slide_gap = 5000 / duration;
-
                     notifyScope.ngNotify.notifyStyle = {
-                        display: 'block',
-                        opacity: opacity
+                        display: 'block'
                     };
 
-                    var slide = function () {};
-                    var margin = 0;
+                    notifyScope.ngNotify.notifyClass += ("pre-op-" + opacity);
 
-                    if (mode === FADE_OUT_MODE && notifyScope.ngNotify.dismissSwipe) {
-                      notifyScope.ngNotify.notifyStyle['overflow-x'] = "hidden";
-                      notifyScope.ngNotify.notifyStyle[('margin-' + notifyScope.ngNotify.direction)] = margin + "%";
-                      slide = function () {
-                        margin += slide_gap;
-                        notifyScope.ngNotify.notifyStyle[('margin-' + notifyScope.ngNotify.direction)] = margin + "%";
-                      };
-                    }
-
-                    var onCloseFunc;
-
-                    var func = function() {
-
-                        opacity += mode * gap;
-
-                        notifyScope.ngNotify.notifyStyle.opacity = opacity;
-                        slide();
-
-                        if (opacity <= OPACITY_MIN || OPACITY_MAX <= opacity) {
-
-                            $interval.cancel(notifyInterval);
-                            notifyInterval = false;
-
-                            callback();
+                    $timeout(function () {
+                        if (mode === FADE_OUT_MODE && notifyScope.ngNotify.dismissSwipe) {
+                            notifyScope.ngNotify.notifyClass += " hide-" + notifyScope.ngNotify.direction;
+                            $timeout(function () {
+                                callback();
+                            }, 750);
+                        } else {
+                            notifyScope.ngNotify.notifyClass += (" fade-" + (mode === FADE_OUT_MODE ? "out" : "in"));
+                            $timeout(function () {
+                                callback();
+                            }, 750);
                         }
-                    };
-
-                    if (!notifyInterval) {
-                        notifyInterval = $interval(func, FADE_INTERVAL);
-                    }
+                    }, 0);
                 };
 
                 /**
@@ -359,7 +337,9 @@
                  */
                 var fadeOut = function(duration, callback) {
                     doFade(FADE_OUT_MODE, OPACITY_MAX, duration, function () {
-                        notifyScope.ngNotify.onClose();
+                        if (notifyScope.ngNotify.onClose && typeof notifyScope.ngNotify.onClose === "function") {
+                            notifyScope.ngNotify.onClose();
+                        }
                         callback();
                     });
                 };
