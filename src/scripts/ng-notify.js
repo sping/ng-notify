@@ -43,10 +43,10 @@
 
     var html =
         '<div class="ngn" data-ng-class="ngNotify.notifyClass" data-ng-style="ngNotify.notifyStyle" data-ng-swipe-right="ngNotify.dismissSwipe(\'left\')" data-ng-swipe-left="ngNotify.dismissSwipe(\'right\')">' +
-            '<span data-ng-show="ngNotify.notifyButton" class="ngn-dismiss" data-ng-click="dismiss()">&times;</span>' +
-            '<span data-ng-if="ngNotify.notifyHtml && !ngNotify.useScope" data-ng-bind-html="ngNotify.notifyMessage"></span>' + // Display HTML notifications.
-            '<span data-ng-if="ngNotify.notifyHtml && ngNotify.useScope" class="ng-notify-injection-element"></span>' + // Display HTML and scope notifications.
-            '<span data-ng-if="!ngNotify.notifyHtml" data-ng-bind="ngNotify.notifyMessage"></span>' + // Display escaped notifications.
+        '<span data-ng-show="ngNotify.notifyButton" class="ngn-dismiss" data-ng-click="dismiss()">&times;</span>' +
+        '<span data-ng-if="ngNotify.notifyHtml" data-ng-bind-html="ngNotify.notifyMessage"></span>' + // Display HTML notifications.
+        '<div data-ng-if="ngNotify.notifyHtml && ngNotify.useScope" class="ng-notify-injection-element"></div>' + // Display HTML and scope notifications.
+        '<span data-ng-if="!ngNotify.notifyHtml" data-ng-bind="ngNotify.notifyMessage"></span>' + // Display escaped notifications.
         '</div>';
 
     module.run(['$templateCache',
@@ -91,7 +91,7 @@
                     html: false,
                     scope: {},
                     dismissOnSwipe: false,
-                    onClose: function () {}
+                    onClose: function() {}
                 };
 
                 var defaultScope = {
@@ -265,7 +265,7 @@
                  * @returns {boolean}
                  */
                 var getDismissOnSwipe = function(userOpts) {
-                    return  userOpts.dismissOnSwipe || defaultOptions.dismissOnSwipe;
+                    return userOpts.dismissOnSwipe || defaultOptions.dismissOnSwipe;
                 };
 
                 var getOnClose = function(userOpts) {
@@ -283,8 +283,8 @@
                 var getClasses = function(userOpts, isSticky) {
 
                     var classes = getType(userOpts) +
-                                  getTheme(userOpts) +
-                                  getPosition(userOpts);
+                        getTheme(userOpts) +
+                        getPosition(userOpts);
 
                     classes += isSticky ? STICKY_CLASS : EMPTY;
                     notifySetClasses = classes;
@@ -315,15 +315,15 @@
 
                     notifyScope.ngNotify.notifyClass = notifySetClasses + ("pre-op-" + opacity);
 
-                    $timeout(function () {
+                    $timeout(function() {
                         if (mode === FADE_OUT_MODE && notifyScope.ngNotify.dismissSwipe) {
                             notifyScope.ngNotify.notifyClass += " hide-" + notifyScope.ngNotify.direction;
-                            notifyTimeout = $timeout(function () {
+                            notifyTimeout = $timeout(function() {
                                 callback();
                             }, FADE_OUT_DURATION);
                         } else {
                             notifyScope.ngNotify.notifyClass += (" fade-" + (mode === FADE_OUT_MODE ? "out" : "in"));
-                            notifyTimeout = $timeout(function () {
+                            notifyTimeout = $timeout(function() {
                                 callback();
                             }, FADE_OUT_DURATION);
                         }
@@ -337,7 +337,7 @@
                  * @param {Function} callback - function to invoke once fade has completed.
                  */
                 var fadeOut = function(duration, callback) {
-                    doFade(FADE_OUT_MODE, OPACITY_MAX, duration, function () {
+                    doFade(FADE_OUT_MODE, OPACITY_MAX, duration, function() {
                         if (notifyScope.ngNotify.onClose && typeof notifyScope.ngNotify.onClose === "function") {
                             notifyScope.ngNotify.onClose();
                         }
@@ -424,7 +424,7 @@
                             notifyButton: showButton(userOpts, isSticky),
                             useScope: getScope(userOpts),
                             dismissOnSwipe: getDismissOnSwipe(userOpts),
-                            dismissSwipe: function (direction) {
+                            dismissSwipe: function(direction) {
                                 notifyScope.ngNotify.direction = direction;
                                 notifyScope.dismiss();
                             },
@@ -432,12 +432,16 @@
                         });
 
                         if (userOpts.scope && getHtml(userOpts)) {
-                            $timeout(function () {
-                                $document.find("span.ng-notify-injection-element").append($compile(message)(userOpts.scope));
+                            $timeout(function() {
+                                document.querySelector("div.ng-notify-injection-element").innerHTML = "";
+                                var compiledMessage = $compile(message)(userOpts.scope);
+                                for (var i = 0; i < compiledMessage.length; i++) {
+                                    document.querySelector("div.ng-notify-injection-element").appendChild(compiledMessage[i]);
+                                }
                             }, 100);
                         } else {
                             angular.extend(notifyScope.ngNotify, {
-                                notifyMessage:  message
+                                notifyMessage: message
                             });
                         }
 
