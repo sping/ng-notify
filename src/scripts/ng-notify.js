@@ -434,7 +434,7 @@
                         if (userOpts.scope && getHtml(userOpts)) {
                             $timeout(function () {
                                 $document.find("span.ng-notify-injection-element").append($compile(message)(userOpts.scope));
-                            });
+                            }, 100);
                         } else {
                             angular.extend(notifyScope.ngNotify, {
                                 notifyMessage:  message
