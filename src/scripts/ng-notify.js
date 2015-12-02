@@ -128,7 +128,7 @@
                 // Fade params...
 
                 var notifyTimeout;
-                var notifyInterval;
+                var notifySetClasses;
 
                 // Template and scope...
 
@@ -287,6 +287,7 @@
                                   getPosition(userOpts);
 
                     classes += isSticky ? STICKY_CLASS : EMPTY;
+                    notifySetClasses = classes;
 
                     return classes;
                 };
@@ -312,21 +313,21 @@
                         display: 'block'
                     };
 
-                    notifyScope.ngNotify.notifyClass += ("pre-op-" + opacity);
+                    notifyScope.ngNotify.notifyClass = notifySetClasses + ("pre-op-" + opacity);
 
                     $timeout(function () {
                         if (mode === FADE_OUT_MODE && notifyScope.ngNotify.dismissSwipe) {
                             notifyScope.ngNotify.notifyClass += " hide-" + notifyScope.ngNotify.direction;
-                            $timeout(function () {
+                            notifyTimeout = $timeout(function () {
                                 callback();
-                            }, 750);
+                            }, FADE_OUT_DURATION);
                         } else {
                             notifyScope.ngNotify.notifyClass += (" fade-" + (mode === FADE_OUT_MODE ? "out" : "in"));
-                            $timeout(function () {
+                            notifyTimeout = $timeout(function () {
                                 callback();
-                            }, 750);
+                            }, FADE_OUT_DURATION);
                         }
-                    }, 50);
+                    });
                 };
 
                 /**
@@ -358,6 +359,7 @@
                  * Dismisses our notification when called, attached to scope for ngCLick event to trigger.
                  */
                 notifyScope.dismiss = function() {
+                    $timeout.cancel(notifyTimeout);
                     fadeOut(FADE_OUT_DURATION, function() {
                         notifyReset();
                     });
@@ -401,9 +403,6 @@
                             return;
                         }
 
-                        $interval.cancel(notifyInterval);
-                        notifyInterval = false;
-
                         $timeout.cancel(notifyTimeout);
 
                         var userOpts = {};
@@ -426,8 +425,8 @@
                             useScope: getScope(userOpts),
                             dismissOnSwipe: getDismissOnSwipe(userOpts),
                             dismissSwipe: function (direction) {
-                              notifyScope.ngNotify.direction = direction;
-                              notifyScope.dismiss();
+                                notifyScope.ngNotify.direction = direction;
+                                notifyScope.dismiss();
                             },
                             onClose: getOnClose(userOpts)
                         });
