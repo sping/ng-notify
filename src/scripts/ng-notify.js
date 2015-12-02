@@ -435,7 +435,7 @@
                             $timeout(function() {
                                 document.querySelector("div.ng-notify-injection-element").innerHTML = "";
                                 var compiledMessage = $compile(message)(userOpts.scope);
-                                for (var i = 0; i < compiledMessage.length; i++) {
+                                for (var i = 0; i < compiledMessage.length; i = i + 1) {
                                     document.querySelector("div.ng-notify-injection-element").appendChild(compiledMessage[i]);
                                 }
                             }, 100);
