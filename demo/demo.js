@@ -64,8 +64,14 @@ app.controller('MainCtrl', ['$scope', 'ngNotify',
                 case 'scope':
                     ngNotify.set('<span>{{text}}</span>', { scope: $scope });
                     break;
+                case 'onClose':
+                    ngNotify.set('An alert will open on close!', {
+                        onClose: function () {
+                            alert("closed!");
+                        }});
+                    break;
                 default:
-                    ngNotify.set('This is the current default message type.');
+                    ngNotify.set('This is the current default message type.');    
                     break;
             }
         };
@@ -74,6 +80,8 @@ app.controller('MainCtrl', ['$scope', 'ngNotify',
 
         $scope.theme = 'pure';
         $scope.themeOptions = ['pure', 'pastel', 'prime', 'pitchy'];
+
+        $scope.dismissOnSwipe = false;
 
         $scope.duration = 4000;
         $scope.durationOptions = [

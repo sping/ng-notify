@@ -55,6 +55,7 @@
             <li><a class="btn grimace" ng-class="theme"  ng-click="displayNotify('grimace')">grimace</a></li>
             <li><a class="btn default" ng-click="displayNotify()">default</a></li>
             <br />
+            <li><a class="btn default" ng-click="displayNotify('onClose')">w/ onClose</a></li>
             <li><a class="btn default" ng-click="displayNotify('html')">w/ HTML</a></li>
             <li><a class="btn default" ng-click="displayNotify('scope')">w/ scope</a></li>
             <!-- <li><a ng-click="dismissNotify()">Dismiss</a></li> -->
@@ -123,7 +124,8 @@
     <!-- build:js demo.min.js -->
     <script src="../bower_components/angular/angular.js"></script>
     <script src="../bower_components/angular-sanitize/angular-sanitize.js"></script>
-    <script src="../dist/ng-notify.min.js"></script>
+    <script src="../bower_components/angular-touch/angular-touch.js"></script>
+    <script src="../src/scripts/ng-notify.js"></script>
     <script src="demo.js"></script>
     <!-- /build -->
 
